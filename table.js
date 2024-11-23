@@ -1,5 +1,6 @@
+import sqlite3 from "sqlite3";
 const sqlite = require('sqlite3').verbose();
-const db = new sqlite.Database("./qoute.db", sqlite.OPEN_READWRITE, (err)=>{
+const db = new sqlite3.Database("./qoute.db", sqlite.OPEN_READWRITE, (err)=>{
     if (err) return console.error(err);
 });
 
