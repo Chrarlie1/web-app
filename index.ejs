@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Management</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Item List</h1>
+        <button onclick="openModal('add')">Add Item</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Date Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% items.forEach(function(item) { %>
+                    <tr>
+                        <td><%= item.id %></td>
+                        <td><%= item.name %></td>
+                        <td><%= item.description %></td>
+                        <td><%= item.date_created %></td>
+                        <td>
+                            <button onclick="openModal('edit', <%= item.id %>)">Edit</button>
+                            <button onclick="deleteItem(<%= item.id %>)">Delete</button>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for Add/Edit -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Add Item</h2>
+            <form id="modal-form" action="/items" method="POST">
+                <input type="hidden" id="item-id" name="id">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description">
+                <button type="submit">Save</button>
+                <button type="button" onclick="closeModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Open the modal for adding/editing items
+        function openModal(action, id = null) {
+            document.getElementById('modal').style.display = 'block';
+            const form = document.getElementById('modal-form');
+            const title = document.getElementById('modal-title');
+            
+            if (action === 'add') {
+                title.innerText = 'Add Item';
+                form.action = '/items'; // POST method for adding
+                document.getElementById('item-id').value = '';
+                document.getElementById('name').value = '';
+                document.getElementById('description').value = '';
+            } else {
+                title.innerText = 'Edit Item';
+                form.action = `/items/${id}`; // PUT method for editing
+                document.getElementById('item-id').value = id;
+
+                // Fetch item data and populate form fields
+                fetch(`/items/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('name').value = data.name;
+                        document.getElementById('description').value = data.description;
+                    })
+                    .catch(error => console.error('Error fetching item data:', error));
+            }
+        }
+
+        // Close the modal
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Delete an item
+        function deleteItem(id) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                fetch(`/items/${id}`, {
+                    method: 'DELETE',
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                }).catch(err => console.error('Error deleting item:', err));
+            }
+        }
+    </script>
+</body>
+</html>
